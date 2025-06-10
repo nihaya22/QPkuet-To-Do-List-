@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>QPkuet To-Do List 🎀</title>
+  <style>
+    body {
+      background-color: #ffe6f0;
+      background-image: url("images/qpkuet-bg.png");
+      background-repeat: repeat;
+      background-size: 70px;
+      font-family: 'Comic Sans MS', cursive;
+      color: #ff69b4;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      text-shadow: 1px 1px white;
+    }
+    .qpkuet-badge {
+      font-size: 1em;
+      background-color: #ffccda;
+      padding: 5px 15px;
+      border-radius: 25px;
+      display: inline-block;
+      margin-bottom: 20px;
+      box-shadow: 1px 1px 5px #ff99bb;
+    }
+    #todo-form input {
+      padding: 10px;
+      width: 60%;
+      border: 2px solid #ffb6c1;
+      border-radius: 20px;
+      margin-right: 10px;
+      box-shadow: 1px 1px 5px #ffb6c1;
+    }
+    #todo-form button {
+      padding: 10px 15px;
+      background-color: #ffb6c1;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      box-shadow: 1px 1px 5px #ff69b4;
+      font-weight: bold;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      background-color: #fff0f5;
+      margin: 10px auto;
+      width: 80%;
+      padding: 10px;
+      border-radius: 15px;
+      text-align: left;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+    }
+    .menu {
+      margin-top: 30px;
+    }
+    .menu button {
+      padding: 8px 16px;
+      background-color: #ffccda;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      box-shadow: 1px 1px 5px #ff99bb;
+    }
+    .secret-area {
+      display: none;
+      margin-top: 15px;
+    }
+    .show {
+      display: block;
+    }
+    textarea {
+      width: 80%;
+      border-radius: 12px;
+      padding: 10px;
+      border: 2px solid #ffc0cb;
+      background-color: #fff5f8;
+      margin-bottom: 10px;
+    }
+    .completed {
+      text-decoration: line-through;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎀 QPkuet To-Do List 🎀</h1>
+  <div class="qpkuet-badge">🐾 Buatan QPkuet Imut 💕</div>
+
+  <form id="todo-form">
+    <input type="text" id="new-task" placeholder="Tulis tugas imutmu di sini...">
+    <button type="submit">Tambah 💖</button>
+  </form>
+  <ul id="task-list"></ul>
+
+  <div class="menu">
+    <button onclick="toggleSecret()">🔐 Menu Lainnya</button>
+    <div class="secret-area" id="secret">
+      <textarea placeholder="Tulis rahasia lucu atau diary singkatmu di sini..."></textarea>
+      <div id="folders"></div>
+      <button onclick="addFolder()">➕ Tambah Folder Rahasia</button>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('todo-form');
+    const taskInput = document.getElementById('new-task');
+    const taskList = document.getElementById('task-list');
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const task = taskInput.value;
+      if (task.trim()) {
+        addTask(task);
+        taskInput.value = '';
+      }
+    });
+
+    function addTask(task) {
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <input type="checkbox" onchange="toggleComplete(this)">
+        <span>${task}</span>
+        <button onclick="this.parentElement.remove(); saveTasks();">❌</button>
+      `;
+      taskList.appendChild(li);
+      saveTasks();
+    }
+
+    function toggleComplete(checkbox) {
+      const span = checkbox.nextElementSibling;
+      span.classList.toggle('completed');
+      saveTasks();
+    }
+
+    function saveTasks() {
+      const tasks = [];
+      taskList.querySelectorAll('li').forEach(li => {
+        const checked = li.querySelector('input[type=checkbox]').checked;
+        const text = li.querySelector('span').innerText;
+        tasks.push({ text, completed: checked });
+      });
+      localStorage.setItem('qpkuetTasks', JSON.stringify(tasks));
+    }
+
+    function loadTasks() {
+      const tasks = JSON.parse(localStorage.getItem('qpkuetTasks')) || [];
+      tasks.forEach(task => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleComplete(this)">
+          <span class="${task.completed ? 'completed' : ''}">${task.text}</span>
+          <button onclick="this.parentElement.remove(); saveTasks();">❌</button>
+        `;
+        taskList.appendChild(li);
+      });
+    }
+
+    function toggleSecret() {
+      const secret = document.getElementById('secret');
+      secret.classList.toggle('show');
+    }
+
+    function addFolder() {
+      const folders = document.getElementById('folders');
+
+      const wrapper = document.createElement('div');
+      wrapper.style.marginBottom = '10px';
+
+      const title = document.createElement('div');
+      title.textContent = "📁 Rahasia Baru (klik untuk buka)";
+      title.style.cursor = 'pointer';
+      title.style.backgroundColor = '#ffe4ec';
+      title.style.border = '1px solid #ffc0cb';
+      title.style.padding = '8px';
+      title.style.borderRadius = '10px';
+      title.style.boxShadow = '1px 1px 4px #ffb6c1';
+      title.style.fontWeight = 'bold';
+
+      const textarea = document.createElement('textarea');
+      textarea.placeholder = "Tulis isi rahasiamu di sini...";
+      textarea.rows = 3;
+      textarea.style.display = 'none';
+
+      title.addEventListener('click', () => {
+        textarea.style.display = textarea.style.display === 'none' ? 'block' : 'none';
+      });
+
+      wrapper.appendChild(title);
+      wrapper.appendChild(textarea);
+      folders.appendChild(wrapper);
+    }
+
+    loadTasks();
+  </script>
+</body>
+</html>
