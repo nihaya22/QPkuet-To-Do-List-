@@ -1,9 +1,7 @@
 const CACHE_NAME = 'your-notes-cache-v1';
 const urlsToCache = [
   './',
-  './index.html',
-  './style.css',
-  './main.js'
+  './index.html'
 ];
 
 self.addEventListener('install', function(event) {
